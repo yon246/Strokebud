@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>笔顺宝 StrokeBud · by Yons Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E8404A;
+    --gold: #F5A623;
+    --jade: #3DBEA0;
+    --ink: #1A1A2E;
+    --paper: #FFF9F0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--paper);
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 10% 20%, rgba(232,64,74,0.06) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(61,190,160,0.07) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .lanterns {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 0 5%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .lantern {
+    width: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: swing 3s ease-in-out infinite alternate;
+  }
+  .lantern:nth-child(2) { animation-delay: 0.5s; }
+  .lantern:nth-child(3) { animation-delay: 1s; }
+  .lantern:nth-child(4) { animation-delay: 1.5s; }
+  .lantern:nth-child(5) { animation-delay: 0.8s; }
+
+  @keyframes swing {
+    from { transform: rotate(-5deg); }
+    to { transform: rotate(5deg); }
+  }
+
+  .lantern-string { width: 2px; height: 30px; background: #8B4513; }
+  .lantern-body {
+    width: 22px; height: 32px;
+    background: radial-gradient(circle at 40% 40%, #ff6b6b, #cc0000);
+    border-radius: 50% 50% 40% 40%;
+    box-shadow: 0 0 12px rgba(255,80,80,0.5);
+    position: relative;
+  }
+  .lantern-body::after {
+    content: '';
+    position: absolute;
+    bottom: -6px; left: 50%; transform: translateX(-50%);
+    width: 2px; height: 8px; background: #DAA520;
+  }
+  .lantern-tassel { display: flex; gap: 2px; }
+  .lantern-tassel span { width: 2px; height: 12px; background: #DAA520; border-radius: 2px; }
+
+  .wrapper {
+    position: relative;
+    z-index: 2;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 20px 20px 60px;
+  }
+
+  header { text-align: center; padding: 50px 20px 30px; }
+
+  .title-zh {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 3rem;
+    color: var(--red);
+    letter-spacing: 8px;
+    animation: fadeDown 0.8s ease;
+  }
+
+  .title-en {
+    font-size: 1rem; font-weight: 700;
+    color: var(--ink); opacity: 0.5;
+    letter-spacing: 4px; text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .subtitle { margin-top: 12px; font-size: 1rem; color: var(--ink); opacity: 0.65; }
+
+  .app-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .app-name-zh {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1.15rem;
+    color: var(--gold);
+    letter-spacing: 3px;
+  }
+
+  .app-name-en {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: 2px;
+    opacity: 0.75;
+  }
+
+  .app-name-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  .by-lab {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: white;
+    background: var(--ink);
+    padding: 3px 12px;
+    border-radius: 50px;
+    margin-top: 14px;
+    opacity: 0.45;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #loadingBar {
+    text-align: center;
+    padding: 12px;
+    background: rgba(245,166,35,0.12);
+    border-radius: 12px;
+    font-weight: 700;
+    color: #9a6200;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .input-section {
+    display: flex; gap: 12px;
+    justify-content: center; align-items: center;
+    flex-wrap: wrap; margin: 28px 0;
+  }
+
+  .name-input {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1.8rem;
+    padding: 12px 22px;
+    border: 3px solid var(--gold);
+    border-radius: 16px;
+    background: white;
+    color: var(--ink);
+    letter-spacing: 6px;
+    outline: none;
+    transition: all 0.2s;
+    width: 240px;
+    text-align: center;
+    box-shadow: 0 4px 0 var(--gold);
+  }
+
+  .name-input:focus {
+    border-color: var(--red);
+    box-shadow: 0 4px 0 var(--red), 0 0 0 4px rgba(232,64,74,0.1);
+    transform: translateY(-2px);
+  }
+
+  .name-input::placeholder { color: #ccc; font-size: 1.2rem; letter-spacing: 2px; }
+
+  .learn-btn {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem; font-weight: 900;
+    padding: 14px 28px;
+    background: var(--red); color: white;
+    border: none; border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #b02930;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .learn-btn:hover { background: #d4363f; transform: translateY(-2px); box-shadow: 0 7px 0 #b02930; }
+  .learn-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #b02930; }
+
+  .error-msg {
+    text-align: center; padding: 12px 20px;
+    color: var(--red); font-weight: 700;
+    background: rgba(232,64,74,0.08);
+    border-radius: 12px;
+    display: none; margin: 8px 0;
+  }
+
+  .characters-nav {
+    display: flex; justify-content: center;
+    gap: 16px; flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .char-pill {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 2rem;
+    width: 70px; height: 70px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    border: 3px solid #e0d0c0;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 0 #e0d0c0;
+    color: var(--ink);
+    position: relative;
+    user-select: none;
+  }
+
+  .char-pill:hover { border-color: var(--jade); box-shadow: 0 3px 0 var(--jade); transform: translateY(-3px) scale(1.05); }
+  .char-pill.active { background: var(--red); border-color: #b02930; box-shadow: 0 3px 0 #b02930; color: white; transform: translateY(-3px) scale(1.08); }
+
+  .char-badge {
+    position: absolute; top: -6px; right: -6px;
+    width: 22px; height: 22px;
+    background: var(--gold); border-radius: 50%;
+    font-size: 0.65rem; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    color: white; border: 2px solid white;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .learning-area {
+    background: white;
+    border-radius: 28px;
+    padding: 32px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+    display: none;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .learning-area.visible { display: block; }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .char-header { text-align: center; margin-bottom: 20px; }
+
+  .char-display {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 5rem;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .mode-badge {
+    display: inline-block;
+    padding: 5px 16px;
+    border-radius: 50px;
+    font-size: 0.8rem; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    margin: 8px 0 4px;
+  }
+
+  .mode-badge.watch { background: rgba(61,190,160,0.12); color: var(--jade); }
+  .mode-badge.quiz-mode { background: rgba(245,166,35,0.15); color: #c87f00; }
+
+  .char-info { font-size: 0.9rem; color: #aaa; }
+
+  .canvas-controls {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 16px;
+  }
+
+  .canvas-outer {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #FFFBF5;
+    border: 2px solid #f0e4d0;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.08);
+  }
+
+  /* Grid lines */
+  .canvas-outer::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(rgba(180,140,60,0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(180,140,60,0.12) 1px, transparent 1px);
+    background-size: 50% 50%;
+    pointer-events: none; z-index: 2;
+  }
+
+  .canvas-outer::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 50%;
+    width: 1px;
+    background: rgba(180,140,60,0.18);
+    pointer-events: none; z-index: 2;
+  }
+
+  #hanziTarget { display: block; position: relative; z-index: 1; }
+
+  .stroke-counter { font-size: 0.9rem; color: #aaa; font-weight: 700; text-align: center; }
+
+  .stroke-progress {
+    display: flex; gap: 6px;
+    justify-content: center; flex-wrap: wrap;
+  }
+
+  .stroke-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #e0d0c0;
+    transition: all 0.3s;
+  }
+
+  .stroke-dot.done { background: var(--jade); }
+  .stroke-dot.current { background: var(--gold); transform: scale(1.4); }
+
+  .quiz-hint {
+    font-size: 0.88rem; color: #888; text-align: center;
+    background: rgba(245,166,35,0.1);
+    padding: 8px 18px; border-radius: 50px;
+    display: none;
+  }
+
+  .speed-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.85rem; color: #888; font-weight: 700;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    height: 6px; border-radius: 3px;
+    background: #e0d0c0; outline: none; width: 100px;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--red); cursor: pointer;
+  }
+
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+  .ctrl-btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 0.88rem;
+    padding: 10px 18px;
+    border: none; border-radius: 50px;
+    cursor: pointer; transition: all 0.15s;
+    user-select: none;
+  }
+
+  .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+  .ctrl-btn.jade { background: var(--jade); color: white; box-shadow: 0 4px 0 #2a9680; }
+  .ctrl-btn.jade:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 0 #2a9680; }
+  .ctrl-btn.jade:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 2px 0 #2a9680; }
+
+  .ctrl-btn.gold { background: var(--gold); color: white; box-shadow: 0 4px 0 #c87f00; }
+  .ctrl-btn.gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 0 #c87f00; }
+  .ctrl-btn.gold:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 2px 0 #c87f00; }
+
+  .ctrl-btn.gray { background: #f0f0f0; color: #666; box-shadow: 0 4px 0 #ccc; }
+  .ctrl-btn.gray:hover:not(:disabled) { transform: translateY(-2px); }
+  .ctrl-btn.gray:active:not(:disabled) { transform: translateY(1px); }
+
+  .ctrl-btn.crimson { background: var(--red); color: white; box-shadow: 0 4px 0 #b02930; }
+  .ctrl-btn.crimson:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 0 #b02930; }
+  .ctrl-btn.crimson:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 2px 0 #b02930; }
+
+  .congrats {
+    display: none; text-align: center;
+    padding: 24px; margin-top: 16px;
+    background: rgba(61,190,160,0.06);
+    border-radius: 20px;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .congrats.show { display: block; }
+  .congrats-emoji { font-size: 3.5rem; margin-bottom: 8px; }
+  .congrats h2 { font-size: 1.6rem; font-weight: 900; color: var(--jade); }
+  .congrats p { color: #888; margin-top: 6px; }
+
+  .empty-state { text-align: center; padding: 50px 20px; color: #bbb; }
+  .empty-icon {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 5rem; color: #e8d5c0; line-height: 1; margin-bottom: 12px;
+  }
+
+  @media (max-width: 500px) {
+    .title-zh { font-size: 2rem; }
+    .char-display { font-size: 3.5rem; }
+    .ctrl-btn { font-size: 0.8rem; padding: 8px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="lanterns">
+  <div class="lantern"><div class="lantern-string"></div><div class="lantern-body"></div><div class="lantern-tassel"><span></span><span></span><span></span></div></div>
+  <div class="lantern"><div class="lantern-string"></div><div class="lantern-body"></div><div class="lantern-tassel"><span></span><span></span><span></span></div></div>
+  <div class="lantern"><div class="lantern-string"></div><div class="lantern-body"></div><div class="lantern-tassel"><span></span><span></span><span></span></div></div>
+  <div class="lantern"><div class="lantern-string"></div><div class="lantern-body"></div><div class="lantern-tassel"><span></span><span></span><span></span></div></div>
+  <div class="lantern"><div class="lantern-string"></div><div class="lantern-body"></div><div class="lantern-tassel"><span></span><span></span><span></span></div></div>
+</div>
+
+<div class="wrapper">
+  <header>
+    <div class="app-name">
+      <span class="app-name-zh">笔顺宝</span>
+      <div class="app-name-dot"></div>
+      <span class="app-name-en">StrokeBud</span>
+    </div>
+    <div class="title-zh">我的名字</div>
+    <div class="title-en">Learn My Chinese Name</div>
+    <p class="subtitle">Type your Chinese name and learn to write it stroke by stroke! ✨</p>
+    <div class="by-lab">by Yons Lab</div>
+  </header>
+
+  <div id="loadingBar">⏳ Loading stroke library…</div>
+
+  <div class="input-section">
+    <input type="text" class="name-input" id="nameInput" placeholder="王小明" maxlength="6" />
+    <button class="learn-btn" onclick="startLearning()">Learn! 学习</button>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <div class="characters-nav" id="charsNav"></div>
+
+  <div class="learning-area" id="learningArea">
+    <div class="char-header">
+      <div class="char-display" id="charDisplay"></div>
+      <div class="mode-badge watch" id="modeBadge">👁 Watch Mode</div>
+      <div class="char-info" id="charInfo">Loading strokes…</div>
+    </div>
+
+    <div class="canvas-controls">
+      <div class="canvas-outer" id="canvasOuter">
+        <svg id="hanziTarget"></svg>
+      </div>
+
+      <div class="stroke-counter" id="strokeCounter"></div>
+      <div class="stroke-progress" id="strokeProgress"></div>
+      <div class="quiz-hint" id="quizHint">Draw each stroke on the canvas! A red hint appears after 3 mistakes ✏️</div>
+
+      <div class="speed-row">
+        🐢
+        <input type="range" id="speedSlider" min="1" max="5" step="1" value="3"
+               oninput="updateSpeed(this.value)">
+        🐇
+        <span id="speedLabel">Normal</span>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl-btn gray"    onclick="resetChar()">↩ Reset</button>
+        <button class="ctrl-btn jade"    onclick="animateAll()">▶ Watch All</button>
+        <button class="ctrl-btn jade"    onclick="animateStep()">⏭ Step</button>
+        <button class="ctrl-btn gold"    onclick="startQuiz()">✏️ Practice!</button>
+      </div>
+
+      <div class="controls" style="margin-top:4px">
+        <button class="ctrl-btn crimson" id="prevBtn" onclick="navigate(-1)">← Prev</button>
+        <button class="ctrl-btn crimson" id="nextBtn" onclick="navigate(1)">Next →</button>
+      </div>
+    </div>
+
+    <div class="congrats" id="congrats">
+      <div class="congrats-emoji">🎉</div>
+      <h2>太棒了！ Amazing!</h2>
+      <p>You wrote all the strokes correctly! Keep practising to become a master! 🌟</p>
+    </div>
+  </div>
+
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">名</div>
+    <p>Enter your Chinese name above to begin! 🌟</p>
+  </div>
+</div>
+
+<script>
+// ── Dynamic script loader with CDN fallbacks ──
+const CDNS = [
+  'https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js',
+  'https://unpkg.com/hanzi-writer@3.5.0/dist/hanzi-writer.min.js',
+  'https://cdn.jsdelivr.net/npm/hanzi-writer@3.4.0/dist/hanzi-writer.min.js',
+  'https://unpkg.com/hanzi-writer@3.4.0/dist/hanzi-writer.min.js',
+  'https://cdn.jsdelivr.net/npm/hanzi-writer@3.3.0/dist/hanzi-writer.min.js',
+];
+
+let hwReady = false;
+let hwPromise = null;
+
+function loadScript(url) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = url;
+    s.onload = () => res(url);
+    s.onerror = () => rej(url);
+    document.head.appendChild(s);
+  });
+}
+
+async function ensureHW() {
+  if (hwReady) return true;
+  if (hwPromise) return hwPromise;
+
+  hwPromise = (async () => {
+    document.getElementById('loadingBar').style.display = 'block';
+    for (const url of CDNS) {
+      try {
+        await loadScript(url);
+        if (typeof HanziWriter !== 'undefined') {
+          hwReady = true;
+          document.getElementById('loadingBar').style.display = 'none';
+          return true;
+        }
+      } catch (_) { /* try next */ }
+    }
+    document.getElementById('loadingBar').style.display = 'none';
+    showError('Could not load stroke library. Please check your internet connection and refresh the page.');
+    return false;
+  })();
+
+  return hwPromise;
+}
+
+// ── State ──
+let characters  = [];
+let currentIndex = 0;
+let writer       = null;
+let strokeCount  = 0;
+let currentStroke = 0;
+let charReady    = false;
+
+// speed in strokes/second ratio (higher = faster)
+const SPEED_LABELS = ['Very Slow','Slow','Normal','Fast','Very Fast'];
+const SPEED_VALUES  = [0.4, 0.7, 1.2, 2.2, 4.0];
+let animSpeed = SPEED_VALUES[2]; // default Normal
+
+function updateSpeed(val) {
+  const i = parseInt(val) - 1;
+  animSpeed = SPEED_VALUES[i];
+  document.getElementById('speedLabel').textContent = SPEED_LABELS[i];
+}
+
+function isChinese(ch) {
+  return /[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/.test(ch);
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function clearError() {
+  document.getElementById('errorMsg').style.display = 'none';
+}
+
+// ── Main entry ──
+async function startLearning() {
+  clearError();
+  const raw   = document.getElementById('nameInput').value.trim();
+  const chars = [...raw].filter(isChinese);
+
+  if (!chars.length) {
+    showError('Please enter Chinese characters! 请输入中文字符！');
+    return;
+  }
+
+  const ok = await ensureHW();
+  if (!ok) return;
+
+  characters = chars;
+  currentIndex = 0;
+  buildNav();
+  document.getElementById('emptyState').style.display = 'none';
+  loadCharacter(0);
+}
+
+// ── Nav ──
+function buildNav() {
+  const nav = document.getElementById('charsNav');
+  nav.innerHTML = '';
+  characters.forEach((ch, i) => {
+    const pill = document.createElement('div');
+    pill.className = 'char-pill' + (i === 0 ? ' active' : '');
+    pill.textContent = ch;
+    const badge = document.createElement('div');
+    badge.className = 'char-badge';
+    badge.textContent = i + 1;
+    pill.appendChild(badge);
+    pill.onclick = () => loadCharacter(i);
+    nav.appendChild(pill);
+  });
+  syncNav(0);
+}
+
+function syncNav(idx) {
+  document.querySelectorAll('.char-pill').forEach((p, i) => p.classList.toggle('active', i === idx));
+  document.getElementById('prevBtn').disabled = idx === 0;
+  document.getElementById('nextBtn').disabled = idx === characters.length - 1;
+}
+
+// ── Load character ──
+function loadCharacter(idx) {
+  currentIndex  = idx;
+  charReady     = false;
+  currentStroke = 0;
+
+  syncNav(idx);
+
+  const ch = characters[idx];
+  document.getElementById('charDisplay').textContent = ch;
+  document.getElementById('charInfo').textContent    = 'Loading…';
+  document.getElementById('congrats').classList.remove('show');
+  document.getElementById('quizHint').style.display  = 'none';
+  document.getElementById('strokeProgress').innerHTML = '';
+  document.getElementById('strokeCounter').textContent = '';
+  setMode('watch');
+
+  document.getElementById('learningArea').classList.add('visible');
+
+  // Determine canvas size
+  const size = Math.min(window.innerWidth - 100, 300);
+  const outer = document.getElementById('canvasOuter');
+  outer.style.width  = size + 'px';
+  outer.style.height = size + 'px';
+
+  // Clear and resize SVG target
+  const svg = document.getElementById('hanziTarget');
+  svg.setAttribute('width',  size);
+  svg.setAttribute('height', size);
+  // Remove all children to reset the writer
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  writer = null;
+
+  try {
+    writer = HanziWriter.create('hanziTarget', ch, {
+      width:  size,
+      height: size,
+      padding: 20,
+      showOutline:  true,
+      strokeColor:  '#1A1A2E',
+      outlineColor: '#E8D5C0',
+      drawingColor: '#E8404A',
+      highlightColor: '#F5A623',
+      drawingWidth: Math.max(5, size / 55),
+      strokeAnimationSpeed: animSpeed,
+      delayBetweenStrokes: 350,
+      onLoadCharDataSuccess: (data) => {
+        strokeCount = data.strokes.length;
+        charReady   = true;
+        document.getElementById('charInfo').textContent =
+          strokeCount + ' strokes · ' + (idx + 1) + ' of ' + characters.length;
+        buildStrokeDots(strokeCount);
+        updateDots(0);
+      },
+      onLoadCharDataError: () => {
+        showError('Stroke data not found for "' + ch + '". Try another character.');
+        document.getElementById('charInfo').textContent = 'Not available';
+      }
+    });
+  } catch(e) {
+    showError('Unexpected error: ' + e.message);
+  }
+}
+
+// ── UI helpers ──
+function setMode(mode) {
+  const badge = document.getElementById('modeBadge');
+  if (mode === 'watch') {
+    badge.textContent = '👁 Watch Mode';
+    badge.className   = 'mode-badge watch';
+  } else {
+    badge.textContent = '✏️ Practice Mode';
+    badge.className   = 'mode-badge quiz-mode';
+  }
+}
+
+function buildStrokeDots(n) {
+  const prog = document.getElementById('strokeProgress');
+  prog.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'stroke-dot';
+    prog.appendChild(dot);
+  }
+}
+
+function updateDots(done) {
+  const dots = [...document.querySelectorAll('.stroke-dot')];
+  dots.forEach((d, i) => {
+    d.className = 'stroke-dot';
+    if (i < done) d.classList.add('done');
+    else if (i === done && done < strokeCount) d.classList.add('current');
+  });
+  const counter = document.getElementById('strokeCounter');
+  counter.textContent = done >= strokeCount
+    ? `✓ All ${strokeCount} strokes complete!`
+    : `Stroke ${done} / ${strokeCount}`;
+}
+
+// ── Buttons ──
+function animateAll() {
+  if (!writer || !charReady) return;
+  setMode('watch');
+  document.getElementById('quizHint').style.display = 'none';
+  document.getElementById('congrats').classList.remove('show');
+  currentStroke = 0;
+  updateDots(0);
+
+  writer.animateCharacter({
+    strokeAnimationSpeed: animSpeed,
+    delayBetweenStrokes: 350
+  });
+
+  // Tick dots while animating
+  const msPerStroke = (1000 / animSpeed) + 350;
+  let s = 0;
+  const tick = () => {
+    s++;
+    updateDots(s);
+    if (s < strokeCount) setTimeout(tick, msPerStroke);
+  };
+  setTimeout(tick, 1000 / animSpeed);
+}
+
+function animateStep() {
+  if (!writer || !charReady) return;
+  setMode('watch');
+  document.getElementById('quizHint').style.display = 'none';
+
+  // Wrap around
+  if (currentStroke >= strokeCount) {
+    currentStroke = 0;
+    writer.hideCharacter();
+    updateDots(0);
+    return;
+  }
+
+  writer.animateStroke(currentStroke, {
+    strokeAnimationSpeed: animSpeed,
+    onComplete: () => {
+      currentStroke++;
+      updateDots(currentStroke);
+    }
+  });
+}
+
+function resetChar() {
+  if (!writer) return;
+  setMode('watch');
+  currentStroke = 0;
+  document.getElementById('quizHint').style.display  = 'none';
+  document.getElementById('congrats').classList.remove('show');
+  writer.hideCharacter();
+  updateDots(0);
+}
+
+function startQuiz() {
+  if (!writer || !charReady) return;
+  setMode('quiz');
+  currentStroke = 0;
+  document.getElementById('quizHint').style.display = 'block';
+  document.getElementById('congrats').classList.remove('show');
+  updateDots(0);
+
+  writer.quiz({
+    showHintAfterMisses: 3,
+    highlightOnComplete: true,
+    onMistake: () => {},
+    onCorrectStroke: () => {
+      currentStroke++;
+      updateDots(currentStroke);
+    },
+    onComplete: () => {
+      document.getElementById('congrats').classList.add('show');
+      document.getElementById('quizHint').style.display = 'none';
+      updateDots(strokeCount);
+      confetti();
+    }
+  });
+}
+
+function navigate(dir) {
+  const n = currentIndex + dir;
+  if (n < 0 || n >= characters.length) return;
+  loadCharacter(n);
+}
+
+// ── Confetti ──
+function confetti() {
+  const colors = ['#E8404A','#F5A623','#3DBEA0','#FF6B9D','#A855F7','#FFD700'];
+  for (let i = 0; i < 70; i++) {
+    const d = document.createElement('div');
+    const sz = Math.random() * 10 + 6;
+    d.style.cssText = `
+      position:fixed; width:${sz}px; height:${sz}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      border-radius:${Math.random()>0.5?'50%':'3px'};
+      left:${Math.random()*100}vw; top:-20px; z-index:9999;
+      transform:rotate(${Math.random()*360}deg);
+      transition:all ${Math.random()*2+1.5}s ease-out;
+      pointer-events:none;`;
+    document.body.appendChild(d);
+    requestAnimationFrame(() => {
+      d.style.top = '110vh';
+      d.style.transform = `rotate(${Math.random()*720}deg) translateX(${(Math.random()-0.5)*200}px)`;
+    });
+    setTimeout(() => d.remove(), 4000);
+  }
+}
+
+// ── Enter key ──
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startLearning();
+});
+
+// Pre-load HanziWriter silently in the background
+ensureHW();
+</script>
+</body>
+</html>
